@@ -1,10 +1,10 @@
-import leixing from "./src/类型.ts";
-import shengming from "./src/变量声明.ts";
-import jiekou from "./src/接口.ts";
-import lei from "./src/类.ts";
-import fun from "./src/函数.ts";
-import T from "./src/泛型.ts";
-import meiju from "./src/枚举.ts";
+import leixing from "./src/类型";
+import shengming from "./src/变量声明";
+import jiekou from "./src/接口";
+import lei from "./src/类";
+import fun from "./src/函数";
+import T from "./src/泛型";
+import meiju from "./src/枚举";
 
 console.log(leixing);
 

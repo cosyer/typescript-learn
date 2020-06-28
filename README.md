@@ -25,6 +25,452 @@ tsc helloworld.ts
 
 [在线学习语法和特性](https://www.typescriptlang.org/play)
 
+## 类型 (11种)
+### Boolean
+```js
+let isDone: boolean = false;
+// ES5：var isDone = false;
+```
+
+### Number
+```js
+let count: number = 10;
+// ES5：var count = 10;
+```
+
+### String
+```js
+let name: string = "cosyer";
+// ES5：var name = 'cosyer';
+```
+
+### Array
+```js
+let list: number[] = [1, 2, 3];
+// ES5：var list = [1,2,3];
+
+let list: Array<number> = [1, 2, 3]; // Array<number>泛型语法
+// ES5：var list = [1,2,3];
+```
+
+### Enum
+使用枚举我们可以定义一些带名字的常量。使用枚举可以清晰地表达意图或创建一组有区别的用例。 TypeScript 支持数字的和基于字符串的枚举。
+#### 数字枚举
+```js
+enum Direction {
+  NORTH,
+  SOUTH,
+  EAST,
+  WEST,
+}
+
+let dir: Direction = Direction.NORTH;
+```
+默认情况下，NORTH 的初始值为 0，其余的成员会从 1 开始自动增长。换句话说，Direction.SOUTH 的值为 1，Direction.EAST 的值为 2，Direction.WEST 的值为 3。上面的枚举示例代码经过编译后会生成以下代码：
+```js
+"use strict";
+var Direction;
+(function (Direction) {
+  Direction[(Direction["NORTH"] = 0)] = "NORTH";
+  Direction[(Direction["SOUTH"] = 1)] = "SOUTH";
+  Direction[(Direction["EAST"] = 2)] = "EAST";
+  Direction[(Direction["WEST"] = 3)] = "WEST";
+})(Direction || (Direction = {}));
+var dir = Direction.NORTH;
+```
+也可以设置 NORTH 的初始值，比如：
+```js
+enum Direction {
+  NORTH = 3,
+  SOUTH,
+  EAST,
+  WEST,
+}
+```
+
+#### 字符串枚举
+```js
+enum Direction {
+  NORTH = "NORTH",
+  SOUTH = "SOUTH",
+  EAST = "EAST",
+  WEST = "WEST",
+}
+```
+编译生成：
+```js
+"use strict";
+var Direction;
+(function (Direction) {
+    Direction["NORTH"] = "NORTH";
+    Direction["SOUTH"] = "SOUTH";
+    Direction["EAST"] = "EAST";
+    Direction["WEST"] = "WEST";
+})(Direction || (Direction = {}));
+```
+
+#### 异构枚举
+异构枚举的成员值是数字和字符串的混合：
+```js
+enum Enum {
+  A,
+  B,
+  C = "C",
+  D = "D",
+  E = 8,
+  F,
+}
+```
+编译生成：
+```js
+"use strict";
+var Enum;
+(function (Enum) {
+    Enum[Enum["A"] = 0] = "A";
+    Enum[Enum["B"] = 1] = "B";
+    Enum["C"] = "C";
+    Enum["D"] = "D";
+    Enum[Enum["E"] = 8] = "E";
+    Enum[Enum["F"] = 9] = "F";
+})(Enum || (Enum = {}));
+```
+数字枚举相对字符串枚举多了 “反向映射”：
+```js
+console.log(Enum.A) //输出：0
+console.log(Enum[0]) // 输出：A
+```
+
+### Any
+在 TypeScript 中，任何类型都可以被归为 any 类型。这让 any 类型成为了类型系统的顶级类型（也被称作全局超级类型）。
+```js
+l et notSure: any = 666;
+notSure = "cosyer";
+notSure = false;
+```
+any 类型本质上是类型系统的一个逃逸舱。作为开发者，这给了我们很大的自由：TypeScript 允许我们对 any 类型的值执行任何操作，而无需事先执行任何形式的检查。
+```js
+let value: any;
+
+value.foo.bar; // OK
+value.trim(); // OK
+value(); // OK
+new value(); // OK
+value[0][1]; // OK
+```
+在许多场景下，这太宽松了。使用 any 类型，可以很容易地编写类型正确但在运行时有问题的代码。如果我们使用 any 类型，就无法使用 TypeScript 提供的大量的保护机制。为了解决 any 带来的问题，TypeScript 3.0 引入了 unknown 类型。AnyScript 2333.
+
+### Unknown
+就像所有类型都可以赋值给 any，所有类型也都可以赋值给 unknown。这使得 unknown 成为 TypeScript 类型系统的另一种顶级类型（另一种是 any）。下面我们来看一下 unknown 类型的使用示例：
+```js
+let value: unknown;
+
+value = true; // OK
+value = 42; // OK
+value = "Hello World"; // OK
+value = []; // OK
+value = {}; // OK
+value = Math.random; // OK
+value = null; // OK
+value = undefined; // OK
+value = new TypeError(); // OK
+value = Symbol("type"); // OK
+```
+
+对 value 变量的所有赋值都被认为是类型正确的。但是，当我们尝试将类型为 unknown 的值赋值给其他类型的变量时会发生什么？
+
+```js
+let value: unknown;
+
+let value1: unknown = value; // OK
+let value2: any = value; // OK
+let value3: boolean = value; // Error
+let value4: number = value; // Error
+let value5: string = value; // Error
+let value6: object = value; // Error
+let value7: any[] = value; // Error
+let value8: Function = value; // Error
+```
+unknown 类型只能被赋值给 any 类型和 unknown 类型本身。直观地说，这是有道理的：只有能够保存任意类型值的容器才能保存 unknown 类型的值。毕竟我们不知道变量 value 中存储了什么类型的值。
+
+将 value 变量类型设置为 unknown 后，这些操作都不再被认为是类型正确的。通过将 any 类型改变为 unknown 类型，我们已将允许所有更改的默认设置，更改为禁止任何更改。
+
+### Tuple
+众所周知，数组一般由同种类型的值组成，但有时我们需要在单个变量中存储不同类型的值，这时候我们就可以使用元组。在 JavaScript 中是没有元组的，元组是 TypeScript 中特有的类型，其工作方式类似于数组。
+
+元组可用于定义具有有限数量的未命名属性的类型。每个属性都有一个关联的类型。使用元组时，必须提供每个属性的值。为了更直观地理解元组的概念，我们来看一个具体的例子：
+```js
+let tupleType: [string, boolean]; // 强制类型匹配
+tupleType = ["cosyer", true];
+```
+
+### Void
+某种程度上来说，void 类型像是与 any 类型相反，它表示没有任何类型。当一个函数没有返回值时，你通常会见到其返回值类型是 void：
+```js
+// 声明函数返回值为void
+function warnUser(): void {
+  console.log("This is my warning message");
+}
+```
+
+需要注意的是，声明一个 void 类型的变量没有什么作用，因为它的值只能为 undefined 或 null：
+```js
+let unusable: void = undefined;
+```
+
+### Null/Undefined
+TypeScript 里，undefined 和 null 两者有各自的类型分别为 undefined 和 null。
+```js
+let u: undefined = undefined;
+let n: null = null;
+```
+默认情况下 null 和 undefined 是所有类型的子类型。 就是说你可以把 null 和 undefined 赋值给 number 类型的变量。然而，如果你指定了--strictNullChecks 标记，null 和 undefined 只能赋值给 void 和它们各自的类型。
+
+### Never
+never 类型表示的是那些永不存在的值的类型。 例如，never 类型是那些总是会抛出异常或根本就不会有返回值的函数表达式或箭头函数表达式的返回值类型。
+
+```js
+// 返回never的函数必须存在无法达到的终点
+function error(message: string): never {
+  throw new Error(message);
+}
+
+function infiniteLoop(): never {
+  while (true) {}
+}
+```
+
+在 TypeScript 中，可以利用 never 类型的特性来实现全面性检查，具体示例如下：
+```js
+type Foo = string | number;
+
+function controlFlowAnalysisWithNever(foo: Foo) {
+  if (typeof foo === "string") {
+    // 这里 foo 被收窄为 string 类型
+  } else if (typeof foo === "number") {
+    // 这里 foo 被收窄为 number 类型
+  } else {
+    // foo 在这里是 never
+    const check: never = foo;
+  }
+}
+```
+
+注意在 else 分支里面，我们把收窄为 never 的 foo 赋值给一个显示声明的 never 变量。如果一切逻辑正确，那么这里应该能够编译通过。但是假如后来有一天你的同事修改了 Foo 的类型：
+type Foo = string | number | boolean;
+复制代码然而他忘记同时修改 controlFlowAnalysisWithNever 方法中的控制流程，这时候 else 分支的 foo 类型会被收窄为 boolean 类型，导致无法赋值给 never 类型，这时就会产生一个编译错误。通过这个方式，我们可以确保
+controlFlowAnalysisWithNever 方法总是穷尽了 Foo 的所有可能类型。 通过这个示例，我们可以得出一个结论：`使用 never 避免出现新增了联合类型没有对应的实现，目的就是写出类型绝对安全的代码。`
+
+## 类型断言
+### 尖括号
+```js
+let someValue: any = "this is a string";
+let strLength: number = (<string>someValue).length;
+```
+
+### as
+```js
+let someValue: any = "this is a string";
+let strLength: number = (someValue as string).length;
+```
+
+## 类型守卫
+类型保护是可执行运行时检查的一种表达式，用于确保该类型在一定的范围内。换句话说，类型保护可以保证一个字符串是一个字符串，尽管它的值也可以是一个数值。类型保护与特性检测并不是完全不同，其主要思想是尝试检测属性、方法或原型，以确定如何处理值。目前主要有四种的方式来实现类型保护：
+
+### in 关键字
+```js
+interface Admin {
+  name: string;
+  privileges: string[];
+}
+
+interface Employee {
+  name: string;
+  startDate: Date;
+}
+
+type UnknownEmployee = Employee | Admin;
+
+function printEmployeeInformation(emp: UnknownEmployee) {
+  console.log("Name: " + emp.name);
+  if ("privileges" in emp) {
+    console.log("Privileges: " + emp.privileges);
+  }
+  if ("startDate" in emp) {
+    console.log("Start Date: " + emp.startDate);
+  }
+}
+```
+
+### typeof 关键字
+```js
+function padLeft(value: string, padding: string | number) {
+  if (typeof padding === "number") {
+      return Array(padding + 1).join(" ") + value;
+  }
+  if (typeof padding === "string") {
+      return padding + value;
+  }
+  throw new Error(`Expected string or number, got '${padding}'.`);
+}
+```
+typeof 类型保护只支持两种形式：typeof v === "typename" 和 typeof v !== typename，"typename" 必须是 "number"， "string"， "boolean" 或 "symbol"。 但是 TypeScript 并不会阻止你与其它字符串比较，语言不会把那些表达式识别为类型保护。
+
+### instanceof 关键字
+```js
+interface Padder {
+  getPaddingString(): string;
+}
+
+class SpaceRepeatingPadder implements Padder {
+  constructor(private numSpaces: number) {}
+  getPaddingString() {
+    return Array(this.numSpaces + 1).join(" ");
+  }
+}
+
+class StringPadder implements Padder {
+  constructor(private value: string) {}
+  getPaddingString() {
+    return this.value;
+  }
+}
+
+let padder: Padder = new SpaceRepeatingPadder(6);
+
+if (padder instanceof SpaceRepeatingPadder) {
+  // padder的类型收窄为 'SpaceRepeatingPadder'
+}
+```
+
+### 自定义类型保护的类型谓词
+```js
+function isNumber(x: any): x is number {
+  return typeof x === "number";
+}
+
+function isString(x: any): x is string {
+  return typeof x === "string";
+}
+```
+
+## 联合类型和类型别名
+### 联合类型
+联合类型通常与 null 或 undefined 一起使用：
+```js
+const sayHello = (name: string | undefined) => {
+  /* ... */
+};
+```
+例如，这里 name 的类型是 string | undefined 意味着可以将 string 或 undefined 的值传递给sayHello 函数。
+```js
+sayHello("cosyer");
+sayHello(undefined);
+```
+
+### 可辨识联合
+
+TypeScript 可辨识联合（Discriminated Unions）类型，也称为代数数据类型或标签联合类型。它包含 3 个要点：`可辨识、联合类型和类型守卫。`
+
+这种类型的本质是结合联合类型和字面量类型的一种类型保护方法。`如果一个类型是多个类型的联合类型，且多个类型含有一个公共属性，那么就可以利用这个公共属性，来创建不同的类型保护区块。`
+
+#### 可辨识
+可辨识要求联合类型中的每个元素都含有一个单例类型属性(公共属性)，比如：
+```js
+enum CarTransmission {
+  Automatic = 200,
+  Manual = 300
+}
+
+interface Motorcycle {
+  vType: "motorcycle"; // discriminant
+  make: number; // year
+}
+
+interface Car {
+  vType: "car"; // discriminant
+  transmission: CarTransmission
+}
+
+interface Truck {
+  vType: "truck"; // discriminant
+  capacity: number; // in tons
+}
+```
+在上述代码中，我们分别定义了 Motorcycle、 Car 和 Truck 三个接口，在这些接口中都包含一个 vType 属性，该属性被称为可辨识的属性，而其它的属性只跟特性的接口相关。
+
+#### 联合类型
+基于前面定义了三个接口，我们可以创建一个 Vehicle 联合类型：
+```js
+type Vehicle = Motorcycle | Car | Truck;
+```
+现在我们就可以开始使用 Vehicle 联合类型，对于 Vehicle 类型的变量，它可以表示不同类型的车辆。
+
+#### 类型守卫
+下面我们来定义一个 evaluatePrice 方法，该方法用于根据车辆的类型、容量和评估因子来计算价格，具体实现如下：
+```js
+const EVALUATION_FACTOR = Math.PI; 
+function evaluatePrice(vehicle: Vehicle) {
+  return vehicle.capacity * EVALUATION_FACTOR;
+}
+
+const myTruck: Truck = { vType: "truck", capacity: 9.5 };
+evaluatePrice(myTruck);
+```
+对于以上代码，TypeScript 编译器将会提示以下错误信息：
+```js
+Property 'capacity' does not exist on type 'Vehicle'.
+Property 'capacity' does not exist on type 'Motorcycle'.
+```
+
+原因是在 Motorcycle 接口中，并不存在 capacity 属性，而对于 Car 接口来说，它也不存在 capacity 属性。那么，现在我们应该如何解决以上问题呢？这时，我们可以使用类型守卫。下面我们来重构一下前面定义的 evaluatePrice 方法，重构后的代码如下：
+```js
+function evaluatePrice(vehicle: Vehicle) {
+  switch(vehicle.vType) {
+    case "car":
+      return vehicle.transmission * EVALUATION_FACTOR;
+    case "truck":
+      return vehicle.capacity * EVALUATION_FACTOR;
+    case "motorcycle":
+      return vehicle.make * EVALUATION_FACTOR;
+  }
+}
+```
+
+### 类型别名
+类型别名用来给一个类型起个新名字(alias)。
+```js
+type Message = string | string[];
+
+let greet = (message: Message) => {
+  // ...
+};
+```
+
+## 交叉类型
+TypeScript 交叉类型是将多个类型合并为一个类型。 这让我们可以把现有的多种类型叠加到一起成为一种类型，它包含了所需的所有类型的特性。
+
+```js
+interface IPerson {
+  id: string;
+  age: number;
+}
+
+interface IWorker {
+  companyId: string;
+}
+
+type IStaff = IPerson & IWorker;
+
+const staff: IStaff = {
+  id: 'E1006',
+  age: 33,
+  companyId: 'EFT'
+};
+
+console.dir(staff)
+```
+在上面示例中，我们首先为 IPerson 和 IWorker 类型定义了不同的成员，然后通过 & 运算符定义了 IStaff 交叉类型，所以该类型同时拥有 IPerson 和 IWorker 这两种类型的成员。
+
 ## 函数
 ### 区别
 |TypeScript|JavaScript|
@@ -184,8 +630,6 @@ let personWithAge = { ...person, age: 33 };
 let { name, ...rest } = person;
 ```
 
-## 变量声明
-
 ## 接口
 
 在面向对象语言中，接口是一个很重要的概念，它是对行为的抽象，而具体如何行动需要由类去实现。
@@ -223,7 +667,6 @@ ro.length = 100; // error!
 a = ro; // error!
 ```
 
-## 枚举
 
 ## 泛型
 软件工程中，我们不仅要创建一致的定义良好的 API，同时也要考虑可重用性。 组件不仅能够支持当前的数据类型，同时也能支持未来的数据类型，这在创建大型系统时为你提供了十分灵活的功能。
@@ -695,448 +1138,71 @@ cosyer.#name;
 - 不能在私有字段上使用 TypeScript 可访问性修饰符（如 public 或 private）；
 - 私有字段不能在包含的类之外访问，甚至不能被检测到。
 
-## 类型 (11种)
-### Boolean
+## 编译上下文
+### tsconfig.json 的作用
+- 用于标识 TypeScript 项目的根路径；
+- 用于配置 TypeScript 编译器；
+- 用于指定编译的文件。
+
+### tsconfig.json 重要字段
+- files - 设置要编译的文件的名称；
+- include - 设置需要进行编译的文件，支持路径模式匹配；
+- exclude - 设置无需进行编译的文件，支持路径模式匹配；
+- compilerOptions - 设置与编译流程相关的选项。
+
+### compilerOptions 选项
 ```js
-let isDone: boolean = false;
-// ES5：var isDone = false;
-```
+{
+  "compilerOptions": {
 
-### Number
-```js
-let count: number = 10;
-// ES5：var count = 10;
-```
+    /* 基本选项 */
+    "target": "es5",                       // 指定 ECMAScript 目标版本: 'ES3' (default), 'ES5', 'ES6'/'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'
+    "module": "commonjs",                  // 指定使用模块: 'commonjs', 'amd', 'system', 'umd' or 'es2015'
+    "lib": [],                             // 指定要包含在编译中的库文件
+    "allowJs": true,                       // 允许编译 javascript 文件
+    "checkJs": true,                       // 报告 javascript 文件中的错误
+    "jsx": "preserve",                     // 指定 jsx 代码的生成: 'preserve', 'react-native', or 'react'
+    "declaration": true,                   // 生成相应的 '.d.ts' 文件
+    "sourceMap": true,                     // 生成相应的 '.map' 文件
+    "outFile": "./",                       // 将输出文件合并为一个文件
+    "outDir": "./",                        // 指定输出目录
+    "rootDir": "./",                       // 用来控制输出目录结构 --outDir.
+    "removeComments": true,                // 删除编译后的所有的注释
+    "noEmit": true,                        // 不生成输出文件
+    "importHelpers": true,                 // 从 tslib 导入辅助工具函数
+    "isolatedModules": true,               // 将每个文件做为单独的模块 （与 'ts.transpileModule' 类似）.
 
-### String
-```js
-let name: string = "cosyer";
-// ES5：var name = 'cosyer';
-```
+    /* 严格的类型检查选项 */
+    "strict": true,                        // 启用所有严格类型检查选项
+    "noImplicitAny": true,                 // 在表达式和声明上有隐含的 any类型时报错
+    "strictNullChecks": true,              // 启用严格的 null 检查
+    "noImplicitThis": true,                // 当 this 表达式值为 any 类型的时候，生成一个错误
+    "alwaysStrict": true,                  // 以严格模式检查每个模块，并在每个文件里加入 'use strict'
 
-### Array
-```js
-let list: number[] = [1, 2, 3];
-// ES5：var list = [1,2,3];
+    /* 额外的检查 */
+    "noUnusedLocals": true,                // 有未使用的变量时，抛出错误
+    "noUnusedParameters": true,            // 有未使用的参数时，抛出错误
+    "noImplicitReturns": true,             // 并不是所有函数里的代码都有返回值时，抛出错误
+    "noFallthroughCasesInSwitch": true,    // 报告 switch 语句的 fallthrough 错误。（即，不允许 switch 的 case 语句贯穿）
 
-let list: Array<number> = [1, 2, 3]; // Array<number>泛型语法
-// ES5：var list = [1,2,3];
-```
+    /* 模块解析选项 */
+    "moduleResolution": "node",            // 选择模块解析策略： 'node' (Node.js) or 'classic' (TypeScript pre-1.6)
+    "baseUrl": "./",                       // 用于解析非相对模块名称的基目录
+    "paths": {},                           // 模块名到基于 baseUrl 的路径映射的列表
+    "rootDirs": [],                        // 根文件夹列表，其组合内容表示项目运行时的结构内容
+    "typeRoots": [],                       // 包含类型声明的文件列表
+    "types": [],                           // 需要包含的类型声明文件名列表
+    "allowSyntheticDefaultImports": true,  // 允许从没有设置默认导出的模块中默认导入。
 
-### Enum
-使用枚举我们可以定义一些带名字的常量。使用枚举可以清晰地表达意图或创建一组有区别的用例。 TypeScript 支持数字的和基于字符串的枚举。
-#### 数字枚举
-```js
-enum Direction {
-  NORTH,
-  SOUTH,
-  EAST,
-  WEST,
-}
+    /* Source Map Options */
+    "sourceRoot": "./",                    // 指定调试器应该找到 TypeScript 文件而不是源文件的位置
+    "mapRoot": "./",                       // 指定调试器应该找到映射文件而不是生成文件的位置
+    "inlineSourceMap": true,               // 生成单个 soucemaps 文件，而不是将 sourcemaps 生成不同的文件
+    "inlineSources": true,                 // 将代码与 sourcemaps 生成到一个文件中，要求同时设置了 --inlineSourceMap 或 --sourceMap 属性
 
-let dir: Direction = Direction.NORTH;
-```
-默认情况下，NORTH 的初始值为 0，其余的成员会从 1 开始自动增长。换句话说，Direction.SOUTH 的值为 1，Direction.EAST 的值为 2，Direction.WEST 的值为 3。上面的枚举示例代码经过编译后会生成以下代码：
-```js
-"use strict";
-var Direction;
-(function (Direction) {
-  Direction[(Direction["NORTH"] = 0)] = "NORTH";
-  Direction[(Direction["SOUTH"] = 1)] = "SOUTH";
-  Direction[(Direction["EAST"] = 2)] = "EAST";
-  Direction[(Direction["WEST"] = 3)] = "WEST";
-})(Direction || (Direction = {}));
-var dir = Direction.NORTH;
-```
-也可以设置 NORTH 的初始值，比如：
-```js
-enum Direction {
-  NORTH = 3,
-  SOUTH,
-  EAST,
-  WEST,
-}
-```
-
-#### 字符串枚举
-```js
-enum Direction {
-  NORTH = "NORTH",
-  SOUTH = "SOUTH",
-  EAST = "EAST",
-  WEST = "WEST",
-}
-```
-编译生成：
-```js
-"use strict";
-var Direction;
-(function (Direction) {
-    Direction["NORTH"] = "NORTH";
-    Direction["SOUTH"] = "SOUTH";
-    Direction["EAST"] = "EAST";
-    Direction["WEST"] = "WEST";
-})(Direction || (Direction = {}));
-```
-
-#### 异构枚举
-异构枚举的成员值是数字和字符串的混合：
-```js
-enum Enum {
-  A,
-  B,
-  C = "C",
-  D = "D",
-  E = 8,
-  F,
-}
-```
-编译生成：
-```js
-"use strict";
-var Enum;
-(function (Enum) {
-    Enum[Enum["A"] = 0] = "A";
-    Enum[Enum["B"] = 1] = "B";
-    Enum["C"] = "C";
-    Enum["D"] = "D";
-    Enum[Enum["E"] = 8] = "E";
-    Enum[Enum["F"] = 9] = "F";
-})(Enum || (Enum = {}));
-```
-数字枚举相对字符串枚举多了 “反向映射”：
-```js
-console.log(Enum.A) //输出：0
-console.log(Enum[0]) // 输出：A
-```
-
-### Any
-在 TypeScript 中，任何类型都可以被归为 any 类型。这让 any 类型成为了类型系统的顶级类型（也被称作全局超级类型）。
-```js
-l et notSure: any = 666;
-notSure = "cosyer";
-notSure = false;
-```
-any 类型本质上是类型系统的一个逃逸舱。作为开发者，这给了我们很大的自由：TypeScript 允许我们对 any 类型的值执行任何操作，而无需事先执行任何形式的检查。
-```js
-let value: any;
-
-value.foo.bar; // OK
-value.trim(); // OK
-value(); // OK
-new value(); // OK
-value[0][1]; // OK
-```
-在许多场景下，这太宽松了。使用 any 类型，可以很容易地编写类型正确但在运行时有问题的代码。如果我们使用 any 类型，就无法使用 TypeScript 提供的大量的保护机制。为了解决 any 带来的问题，TypeScript 3.0 引入了 unknown 类型。AnyScript 2333.
-
-### Unknown
-就像所有类型都可以赋值给 any，所有类型也都可以赋值给 unknown。这使得 unknown 成为 TypeScript 类型系统的另一种顶级类型（另一种是 any）。下面我们来看一下 unknown 类型的使用示例：
-```js
-let value: unknown;
-
-value = true; // OK
-value = 42; // OK
-value = "Hello World"; // OK
-value = []; // OK
-value = {}; // OK
-value = Math.random; // OK
-value = null; // OK
-value = undefined; // OK
-value = new TypeError(); // OK
-value = Symbol("type"); // OK
-```
-
-对 value 变量的所有赋值都被认为是类型正确的。但是，当我们尝试将类型为 unknown 的值赋值给其他类型的变量时会发生什么？
-
-```js
-let value: unknown;
-
-let value1: unknown = value; // OK
-let value2: any = value; // OK
-let value3: boolean = value; // Error
-let value4: number = value; // Error
-let value5: string = value; // Error
-let value6: object = value; // Error
-let value7: any[] = value; // Error
-let value8: Function = value; // Error
-```
-unknown 类型只能被赋值给 any 类型和 unknown 类型本身。直观地说，这是有道理的：只有能够保存任意类型值的容器才能保存 unknown 类型的值。毕竟我们不知道变量 value 中存储了什么类型的值。
-
-将 value 变量类型设置为 unknown 后，这些操作都不再被认为是类型正确的。通过将 any 类型改变为 unknown 类型，我们已将允许所有更改的默认设置，更改为禁止任何更改。
-
-### Tuple
-众所周知，数组一般由同种类型的值组成，但有时我们需要在单个变量中存储不同类型的值，这时候我们就可以使用元组。在 JavaScript 中是没有元组的，元组是 TypeScript 中特有的类型，其工作方式类似于数组。
-
-元组可用于定义具有有限数量的未命名属性的类型。每个属性都有一个关联的类型。使用元组时，必须提供每个属性的值。为了更直观地理解元组的概念，我们来看一个具体的例子：
-```js
-let tupleType: [string, boolean]; // 强制类型匹配
-tupleType = ["cosyer", true];
-```
-
-### Void
-某种程度上来说，void 类型像是与 any 类型相反，它表示没有任何类型。当一个函数没有返回值时，你通常会见到其返回值类型是 void：
-```js
-// 声明函数返回值为void
-function warnUser(): void {
-  console.log("This is my warning message");
-}
-```
-
-需要注意的是，声明一个 void 类型的变量没有什么作用，因为它的值只能为 undefined 或 null：
-```js
-let unusable: void = undefined;
-```
-
-### Null/Undefined
-TypeScript 里，undefined 和 null 两者有各自的类型分别为 undefined 和 null。
-```js
-let u: undefined = undefined;
-let n: null = null;
-```
-默认情况下 null 和 undefined 是所有类型的子类型。 就是说你可以把 null 和 undefined 赋值给 number 类型的变量。然而，如果你指定了--strictNullChecks 标记，null 和 undefined 只能赋值给 void 和它们各自的类型。
-
-### Never
-never 类型表示的是那些永不存在的值的类型。 例如，never 类型是那些总是会抛出异常或根本就不会有返回值的函数表达式或箭头函数表达式的返回值类型。
-
-```js
-// 返回never的函数必须存在无法达到的终点
-function error(message: string): never {
-  throw new Error(message);
-}
-
-function infiniteLoop(): never {
-  while (true) {}
-}
-```
-
-在 TypeScript 中，可以利用 never 类型的特性来实现全面性检查，具体示例如下：
-```js
-type Foo = string | number;
-
-function controlFlowAnalysisWithNever(foo: Foo) {
-  if (typeof foo === "string") {
-    // 这里 foo 被收窄为 string 类型
-  } else if (typeof foo === "number") {
-    // 这里 foo 被收窄为 number 类型
-  } else {
-    // foo 在这里是 never
-    const check: never = foo;
+    /* 其他选项 */
+    "experimentalDecorators": true,        // 启用装饰器
+    "emitDecoratorMetadata": true          // 为装饰器提供元数据的支持
   }
 }
 ```
-
-注意在 else 分支里面，我们把收窄为 never 的 foo 赋值给一个显示声明的 never 变量。如果一切逻辑正确，那么这里应该能够编译通过。但是假如后来有一天你的同事修改了 Foo 的类型：
-type Foo = string | number | boolean;
-复制代码然而他忘记同时修改 controlFlowAnalysisWithNever 方法中的控制流程，这时候 else 分支的 foo 类型会被收窄为 boolean 类型，导致无法赋值给 never 类型，这时就会产生一个编译错误。通过这个方式，我们可以确保
-controlFlowAnalysisWithNever 方法总是穷尽了 Foo 的所有可能类型。 通过这个示例，我们可以得出一个结论：`使用 never 避免出现新增了联合类型没有对应的实现，目的就是写出类型绝对安全的代码。`
-
-## 类型断言
-### 尖括号
-```js
-let someValue: any = "this is a string";
-let strLength: number = (<string>someValue).length;
-```
-
-### as
-```js
-let someValue: any = "this is a string";
-let strLength: number = (someValue as string).length;
-```
-
-## 类型守卫
-类型保护是可执行运行时检查的一种表达式，用于确保该类型在一定的范围内。换句话说，类型保护可以保证一个字符串是一个字符串，尽管它的值也可以是一个数值。类型保护与特性检测并不是完全不同，其主要思想是尝试检测属性、方法或原型，以确定如何处理值。目前主要有四种的方式来实现类型保护：
-
-### in 关键字
-```js
-interface Admin {
-  name: string;
-  privileges: string[];
-}
-
-interface Employee {
-  name: string;
-  startDate: Date;
-}
-
-type UnknownEmployee = Employee | Admin;
-
-function printEmployeeInformation(emp: UnknownEmployee) {
-  console.log("Name: " + emp.name);
-  if ("privileges" in emp) {
-    console.log("Privileges: " + emp.privileges);
-  }
-  if ("startDate" in emp) {
-    console.log("Start Date: " + emp.startDate);
-  }
-}
-```
-
-### typeof 关键字
-```js
-function padLeft(value: string, padding: string | number) {
-  if (typeof padding === "number") {
-      return Array(padding + 1).join(" ") + value;
-  }
-  if (typeof padding === "string") {
-      return padding + value;
-  }
-  throw new Error(`Expected string or number, got '${padding}'.`);
-}
-```
-typeof 类型保护只支持两种形式：typeof v === "typename" 和 typeof v !== typename，"typename" 必须是 "number"， "string"， "boolean" 或 "symbol"。 但是 TypeScript 并不会阻止你与其它字符串比较，语言不会把那些表达式识别为类型保护。
-
-### instanceof 关键字
-```js
-interface Padder {
-  getPaddingString(): string;
-}
-
-class SpaceRepeatingPadder implements Padder {
-  constructor(private numSpaces: number) {}
-  getPaddingString() {
-    return Array(this.numSpaces + 1).join(" ");
-  }
-}
-
-class StringPadder implements Padder {
-  constructor(private value: string) {}
-  getPaddingString() {
-    return this.value;
-  }
-}
-
-let padder: Padder = new SpaceRepeatingPadder(6);
-
-if (padder instanceof SpaceRepeatingPadder) {
-  // padder的类型收窄为 'SpaceRepeatingPadder'
-}
-```
-
-### 自定义类型保护的类型谓词
-```js
-function isNumber(x: any): x is number {
-  return typeof x === "number";
-}
-
-function isString(x: any): x is string {
-  return typeof x === "string";
-}
-```
-
-## 联合类型和类型别名
-### 联合类型
-联合类型通常与 null 或 undefined 一起使用：
-```js
-const sayHello = (name: string | undefined) => {
-  /* ... */
-};
-```
-例如，这里 name 的类型是 string | undefined 意味着可以将 string 或 undefined 的值传递给sayHello 函数。
-```js
-sayHello("cosyer");
-sayHello(undefined);
-```
-
-### 可辨识联合
-
-TypeScript 可辨识联合（Discriminated Unions）类型，也称为代数数据类型或标签联合类型。它包含 3 个要点：`可辨识、联合类型和类型守卫。`
-
-这种类型的本质是结合联合类型和字面量类型的一种类型保护方法。`如果一个类型是多个类型的联合类型，且多个类型含有一个公共属性，那么就可以利用这个公共属性，来创建不同的类型保护区块。`
-
-#### 可辨识
-可辨识要求联合类型中的每个元素都含有一个单例类型属性(公共属性)，比如：
-```js
-enum CarTransmission {
-  Automatic = 200,
-  Manual = 300
-}
-
-interface Motorcycle {
-  vType: "motorcycle"; // discriminant
-  make: number; // year
-}
-
-interface Car {
-  vType: "car"; // discriminant
-  transmission: CarTransmission
-}
-
-interface Truck {
-  vType: "truck"; // discriminant
-  capacity: number; // in tons
-}
-```
-在上述代码中，我们分别定义了 Motorcycle、 Car 和 Truck 三个接口，在这些接口中都包含一个 vType 属性，该属性被称为可辨识的属性，而其它的属性只跟特性的接口相关。
-
-#### 联合类型
-基于前面定义了三个接口，我们可以创建一个 Vehicle 联合类型：
-```js
-type Vehicle = Motorcycle | Car | Truck;
-```
-现在我们就可以开始使用 Vehicle 联合类型，对于 Vehicle 类型的变量，它可以表示不同类型的车辆。
-
-#### 类型守卫
-下面我们来定义一个 evaluatePrice 方法，该方法用于根据车辆的类型、容量和评估因子来计算价格，具体实现如下：
-```js
-const EVALUATION_FACTOR = Math.PI; 
-function evaluatePrice(vehicle: Vehicle) {
-  return vehicle.capacity * EVALUATION_FACTOR;
-}
-
-const myTruck: Truck = { vType: "truck", capacity: 9.5 };
-evaluatePrice(myTruck);
-```
-对于以上代码，TypeScript 编译器将会提示以下错误信息：
-```js
-Property 'capacity' does not exist on type 'Vehicle'.
-Property 'capacity' does not exist on type 'Motorcycle'.
-```
-
-原因是在 Motorcycle 接口中，并不存在 capacity 属性，而对于 Car 接口来说，它也不存在 capacity 属性。那么，现在我们应该如何解决以上问题呢？这时，我们可以使用类型守卫。下面我们来重构一下前面定义的 evaluatePrice 方法，重构后的代码如下：
-```js
-function evaluatePrice(vehicle: Vehicle) {
-  switch(vehicle.vType) {
-    case "car":
-      return vehicle.transmission * EVALUATION_FACTOR;
-    case "truck":
-      return vehicle.capacity * EVALUATION_FACTOR;
-    case "motorcycle":
-      return vehicle.make * EVALUATION_FACTOR;
-  }
-}
-```
-
-### 类型别名
-类型别名用来给一个类型起个新名字(alias)。
-```js
-type Message = string | string[];
-
-let greet = (message: Message) => {
-  // ...
-};
-```
-
-## 交叉类型
-TypeScript 交叉类型是将多个类型合并为一个类型。 这让我们可以把现有的多种类型叠加到一起成为一种类型，它包含了所需的所有类型的特性。
-
-```js
-interface IPerson {
-  id: string;
-  age: number;
-}
-
-interface IWorker {
-  companyId: string;
-}
-
-type IStaff = IPerson & IWorker;
-
-const staff: IStaff = {
-  id: 'E1006',
-  age: 33,
-  companyId: 'EFT'
-};
-
-console.dir(staff)
-```
-在上面示例中，我们首先为 IPerson 和 IWorker 类型定义了不同的成员，然后通过 & 运算符定义了 IStaff 交叉类型，所以该类型同时拥有 IPerson 和 IWorker 这两种类型的成员。
