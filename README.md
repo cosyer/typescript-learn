@@ -132,7 +132,7 @@ class Calculator {
 }
 
 const calculator = new Calculator();
-const result = calculator.add("cosyer", " Kakuqo");
+const result = calculator.add("cosyer", " chenyu");
 ```
 这里需要注意的是，当 TypeScript 编译器处理函数重载时，它会查找重载列表，尝试使用第一个重载定义。 如果匹配的话就使用这个。 因此，在定义重载的时候，一定要把最精确的定义放在最前面。另外在 Calculator 类中，add(a: Combinable, b: Combinable){ } 并不是重载列表的一部分，因此对于 add 成员方法来说，我们只定义了四个重载方法。
 
@@ -263,7 +263,7 @@ myGenericNumber.add = function (x, y) {
 - V（Value）：表示对象中的值类型
 - E（Element）：表示元素类型
 
-### 泛型工具类型
+### 泛型工具类型(6种)
 为了方便开发者 TypeScript 内置了一些常用的工具类型，比如 Partial、Required、Readonly、Record 和 ReturnType 等。
 #### type
 typeof 操作符可以用来获取一个变量声明或对象的类型。
@@ -365,6 +365,197 @@ const todo2 = updateTodo(todo1, {
   description: "throw out trash",
 });
 ```
+
+## 装饰器
+### 装饰器是什么
+- 它是一个表达式
+- 该表达式被执行后，返回一个函数
+- 函数的入参分别为 target、name 和 descriptor
+- 执行该函数后，可能返回 descriptor 对象，用于配置 target 对象
+
+### 装饰器的分类
+- 类装饰器（Class decorators）
+- 属性装饰器（Property decorators）
+- 方法装饰器（Method decorators）
+- 参数装饰器（Parameter decorators）
+
+#### 类装饰器
+```js
+declare type ClassDecorator = <TFunction extends Function>(
+  target: TFunction
+) => TFunction | void;
+```
+类装饰器顾名思义，就是用来装饰类的。它接收一个参数：
+- target: TFunction - 被装饰的类
+```js
+function Greeter(target: Function): void {
+  target.prototype.greet = function (): void {
+    console.log("Hello cosyer!");
+  };
+}
+
+@Greeter
+class Greeting {
+  constructor() {
+    // 内部实现
+  }
+}
+
+let myGreeting = new Greeting();
+myGreeting.greet(); // console output: 'Hello cosyer!';
+```
+
+`自定义参数`
+```js
+function Greeter(greeting: string) {
+  return function (target: Function) {
+    target.prototype.greet = function (): void {
+      console.log(greeting);
+    };
+  };
+}
+
+@Greeter("Hello TS!")
+class Greeting {
+  constructor() {
+    // 内部实现
+  }
+}
+
+let myGreeting = new Greeting();
+myGreeting.greet(); // console output: 'Hello TS!';
+```
+
+#### 属性装饰器
+```js
+declare type PropertyDecorator = (target:Object, 
+  propertyKey: string | symbol ) => void;
+```
+
+属性装饰器顾名思义，用来装饰类的属性。它接收两个参数：
+- target: Object - 被装饰的类
+- propertyKey: string | symbol - 被装饰类的属性名
+
+```js
+function logProperty(target: any, key: string) {
+  delete target[key];
+
+  const backingField = "_" + key;
+
+  Object.defineProperty(target, backingField, {
+    writable: true,
+    enumerable: true,
+    configurable: true
+  });
+
+  // property getter
+  const getter = function (this: any) {
+    const currVal = this[backingField];
+    console.log(`Get: ${key} => ${currVal}`);
+    return currVal;
+  };
+
+  // property setter
+  const setter = function (this: any, newVal: any) {
+    console.log(`Set: ${key} => ${newVal}`);
+    this[backingField] = newVal;
+  };
+
+  // Create new property with getter and setter
+  Object.defineProperty(target, key, {
+    get: getter,
+    set: setter,
+    enumerable: true,
+    configurable: true
+  });
+}
+
+class Person { 
+  @logProperty
+  public name: string;
+
+  constructor(name : string) { 
+    this.name = name;
+  }
+}
+
+const p1 = new Person("cosyer");
+p1.name = "chenyu";
+// Set: name => cosyer
+// Set: name => chenyu
+```
+
+#### 方法装饰器
+```js
+declare type MethodDecorator = <T>(target:Object, propertyKey: string | symbol, 	 	
+  descriptor: TypePropertyDescript<T>) => TypedPropertyDescriptor<T> | void;
+```
+
+方法装饰器顾名思义，用来装饰类的方法。它接收三个参数：
+- target: Object - 被装饰的类
+- propertyKey: string | symbol - 方法名
+- descriptor: TypePropertyDescript - 属性描述符
+
+```js
+function LogOutput(tarage: Function, key: string, descriptor: any) {
+  let originalMethod = descriptor.value;
+  let newMethod = function(...args: any[]): any {
+    let result: any = originalMethod.apply(this, args);
+    if(!this.loggedOutput) {
+      this.loggedOutput = new Array<any>();
+    }
+    this.loggedOutput.push({
+      method: key,
+      parameters: args,
+      output: result,
+      timestamp: new Date()
+    });
+    return result;
+  };
+  descriptor.value = newMethod;
+}
+
+class Calculator {
+  @LogOutput
+  double (num: number): number {
+    return num * 2;
+  }
+}
+
+let calc = new Calculator();
+calc.double(11);
+// console ouput: [{method: "double", output: 22, ...}]
+console.log(calc.loggedOutput); 
+```
+
+#### 参数装饰器
+```js
+declare type ParameterDecorator = (target: Object, propertyKey: string | symbol, 
+  parameterIndex: number ) => void
+```
+参数装饰器顾名思义，是用来装饰函数参数，它接收三个参数：
+- target: Object - 被装饰的类
+- propertyKey: string | symbol - 方法名
+- parameterIndex: number - 方法中参数的索引值
+
+```js
+function Log(target: Function, key: string, parameterIndex: number) {
+  let functionLogged = key || target.prototype.constructor.name;
+  console.log(`The parameter in position ${parameterIndex} at ${functionLogged} has
+	been decorated`);
+}
+
+class Greeter {
+  greeting: string;
+  constructor(@Log phrase: string) {
+	this.greeting = phrase; 
+  }
+}
+
+// console output: The parameter in position 0 
+// at Greeter has been decorated
+```
+
 
 ## 类
 ### 类的属性和方法
