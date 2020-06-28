@@ -80,7 +80,7 @@ function createUserId(name: string, id: number, age?: number): string {
 
 // 默认参数
 function createUserId(
-  name: string = "Semlinker",
+  name: string = "cosyer",
   id: number,
   age?: number
 ): string {
@@ -132,9 +132,31 @@ class Calculator {
 }
 
 const calculator = new Calculator();
-const result = calculator.add("Semlinker", " Kakuqo");
+const result = calculator.add("cosyer", " Kakuqo");
 ```
 这里需要注意的是，当 TypeScript 编译器处理函数重载时，它会查找重载列表，尝试使用第一个重载定义。 如果匹配的话就使用这个。 因此，在定义重载的时候，一定要把最精确的定义放在最前面。另外在 Calculator 类中，add(a: Combinable, b: Combinable){ } 并不是重载列表的一部分，因此对于 add 成员方法来说，我们只定义了四个重载方法。
+
+## 数组
+### 数组解构
+```js
+let x: number; let y: number; let z: number;
+let five_array = [0,1,2,3,4];
+[x,y,z] = five_array; // 0 1 2
+```
+
+### 扩展运算符
+```js
+let two_array = [0, 1];
+let five_array = [...two_array, 2, 3, 4];
+```
+
+### 数组遍历
+```js
+let colors: string[] = ["red", "green", "blue"];
+for (let i of colors) {
+  console.log(i);
+}
+```
 
 ## 变量声明
 
@@ -162,7 +184,7 @@ let count: number = 10;
 ### String
 ```js
 let name: string = "Semliker";
-// ES5：var name = 'Semlinker';
+// ES5：var name = 'cosyer';
 ```
 
 ### Array
@@ -265,7 +287,7 @@ console.log(Enum[0]) // 输出：A
 在 TypeScript 中，任何类型都可以被归为 any 类型。这让 any 类型成为了类型系统的顶级类型（也被称作全局超级类型）。
 ```js
 l et notSure: any = 666;
-notSure = "Semlinker";
+notSure = "cosyer";
 notSure = false;
 ```
 any 类型本质上是类型系统的一个逃逸舱。作为开发者，这给了我们很大的自由：TypeScript 允许我们对 any 类型的值执行任何操作，而无需事先执行任何形式的检查。
@@ -321,7 +343,7 @@ unknown 类型只能被赋值给 any 类型和 unknown 类型本身。直观地�
 元组可用于定义具有有限数量的未命名属性的类型。每个属性都有一个关联的类型。使用元组时，必须提供每个属性的值。为了更直观地理解元组的概念，我们来看一个具体的例子：
 ```js
 let tupleType: [string, boolean]; // 强制类型匹配
-tupleType = ["Semlinker", true];
+tupleType = ["cosyer", true];
 ```
 
 ### Void
@@ -484,7 +506,7 @@ const sayHello = (name: string | undefined) => {
 ```
 例如，这里 name 的类型是 string | undefined 意味着可以将 string 或 undefined 的值传递给sayHello 函数。
 ```js
-sayHello("Semlinker");
+sayHello("cosyer");
 sayHello(undefined);
 ```
 
