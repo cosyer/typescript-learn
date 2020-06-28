@@ -158,6 +158,32 @@ for (let i of colors) {
 }
 ```
 
+## 对象
+### 对象解构
+```js
+let person = {
+  name: "cosyer",
+  gender: "Male",
+};
+
+let { name, gender } = person;
+```
+
+### 对象展开扩展
+```js
+let person = {
+  name: "cosyer",
+  gender: "Male",
+  address: "Nanjing",
+};
+
+// 组装对象
+let personWithAge = { ...person, age: 33 };
+
+// 获取除了某些项外的其它项
+let { name, ...rest } = person;
+```
+
 ## 变量声明
 
 ## 接口
