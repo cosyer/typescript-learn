@@ -24,7 +24,7 @@ function canSelect(
   return {
     color: obj.color,
     opa: obj.opa,
-    area: width * width
+    area: width * width,
   };
 }
 
@@ -34,7 +34,7 @@ console.log(canSelect({ color: "红色", opa: 0.5 }));
 
 let readObj: { readonly name: string; readonly age: number } = {
   name: "曹",
-  age: 20
+  age: 20,
 };
 
 console.log(readObj);
@@ -56,7 +56,7 @@ interface funInterface {
   (name: string): boolean;
 }
 let fun: funInterface;
-fun = function(name) {
+fun = function (name) {
   if (name) {
     return true;
   }
@@ -87,7 +87,7 @@ function getOwerMesage(type: string, area: string, name: string): ower {
     name,
     print() {
       console.log(`类型为${this.type},地址在${this.area}, 姓名为${this.name}`);
-    }
+    },
   };
 }
 

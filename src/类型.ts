@@ -14,7 +14,7 @@ let tu: [string, number] = ["3123", 313123];
 enum peo {
   a,
   b,
-  c
+  c,
 }
 let c: peo = peo.a;
 // Any   任意类型

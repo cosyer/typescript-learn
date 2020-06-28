@@ -6,7 +6,7 @@ enum def {
   one,
   two,
   three,
-  four
+  four,
 }
 
 console.log(def);
@@ -23,6 +23,6 @@ enum Direction {
   Up = "UP",
   Down = "DOWN",
   Left = "LEFT",
-  Right = "RIGHT"
+  Right = "RIGHT",
 }
 console.log(Direction);

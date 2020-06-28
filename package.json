@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx webpack-dev-server --mode development --content-base ./dist",
+    "dev": "npx webpack-dev-server --open --inline --progress --mode development --content-base ./dist",
     "webpack": "webpack --progress --colors -w"
   },
   "author": "",
@@ -13,6 +13,7 @@
   "dependencies": {},
   "devDependencies": {
     "awesome-typescript-loader": "^5.2.0",
+    "html-webpack-plugin": "^4.3.0",
     "ts-loader": "^4.4.1",
     "typescript": "^2.9.2",
     "webpack": "^4.12.1",

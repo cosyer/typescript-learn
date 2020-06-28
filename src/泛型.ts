@@ -31,7 +31,7 @@ class fanClass<YY> {
   cao: <YY>(x: YY, y: YY) => YY;
 }
 let wolg = new fanClass<number>(222);
-wolg.cao = function(x, y) {
+wolg.cao = function (x, y) {
   console.log(x, y);
   return this.md;
 };
