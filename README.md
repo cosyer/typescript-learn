@@ -270,7 +270,7 @@ let strLength: number = (<string>someValue).length;
 ### as
 ```js
 let someValue: any = "this is a string";
-let strLength: number = (someValue as string).length;
+let strLength: number = (someValue as string).length; // <string> someValue
 ```
 
 ## 类型守卫
@@ -749,7 +749,7 @@ type Obj =  {
 } // -> { a: any, b: any, c: any }
 ```
 
-#### infer
+#### infer 让TS自己推断 只能用于extends
 在条件类型语句中，可以用 infer 声明一个类型变量并且对它进行使用。
 ```js
 type ReturnType<T> = T extends (
@@ -1107,6 +1107,30 @@ class Snake extends Animal {
 
 let sam = new Snake("Sammy the Python");
 sam.move();
+```
+
+### 键值对 高阶类型
+Record<string, string>
+```ts
+// 限定和判断
+type demo<T extends string | number> = T
+const str: demo = '123'
+
+type demo1<T> = T extends string ? 1 : 2
+const str1:demo1<string> = 1
+
+[ket in keyof T]
+```
+
+### Pick
+```ts
+type MyPick<T, P extends keyof T> = {
+  [U in P]?: T[U]
+}
+
+type Merge<T, P> = {
+  [U in keyof T | keyof P]: T[keyof T] | P[keyof P]
+}
 ```
 
 ### 私有字段
