@@ -1,6 +1,8 @@
 # typescript
 [TypeScript](https://www.typescriptlang.org/) 是一种由微软开发的自由和开源的编程语言。它是 JavaScript 的一个超集，而且本质上向这个语言添加了可选的静态类型和基于类的面向对象编程。
 
+> TypeScript 的核心设计理念：在完整保留 JavaScript 运行时行为的基础上，通过引入静态类型系统来提高代码的可维护性，减少可能出现的 bug。
+
 ## 区别
 |TypeScript|JavaScript|
 |:---:|:---:|
@@ -14,13 +16,20 @@
 
 ### 安装
 ```js
+// 弱类型存在强制类型转换
 npm install -g typescript
+```
+
+```py
+print(1 + '1')
+# TypeError: unsupported operand type(s) for +: 'int' and 'str'
 ```
 
 ### 编译
 ```js
 tsc helloworld.ts
 // helloworld.ts => helloworld.js
+// ts-node 是编译+执行，tsc 编译
 ```
 
 [在线学习语法和特性](https://www.typescriptlang.org/play)
@@ -1193,6 +1202,7 @@ cosyer.#name;
     "rootDir": "./",                       // 用来控制输出目录结构 --outDir.
     "removeComments": true,                // 删除编译后的所有的注释
     "noEmit": true,                        // 不生成输出文件
+    "noEmitOnError": true                  // 编译出错不生成文件
     "importHelpers": true,                 // 从 tslib 导入辅助工具函数
     "isolatedModules": true,               // 将每个文件做为单独的模块 （与 'ts.transpileModule' 类似）.
 
@@ -1230,3 +1240,8 @@ cosyer.#name;
   }
 }
 ```
+
+## 参考
+- [TypeScript 速成教程](https://github.com/joye61/typescript-tutorial)
+- [TypeScript 入门教程](https://github.com/xcatliu/typescript-tutorial)
+- [深入理解 TypeScript](https://github.com/jkchao/typescript-book-chinese)
